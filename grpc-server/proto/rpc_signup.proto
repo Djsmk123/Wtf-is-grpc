@@ -1,0 +1,16 @@
+syntax="proto3";
+package pb;
+import "user.proto";
+option go_package="github.com/djsmk123/server/pb";
+
+
+message SignupRequestMessage{
+    string username=1;
+    string password=2;
+    string name=3;
+}
+
+message SignupResponseMessage{
+    User user=1;
+    
+}

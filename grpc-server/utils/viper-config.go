@@ -13,6 +13,7 @@ type ViperConfig struct {
 	RPCSERVERADDRESS    string        `mapstructure:"RPC_SERVER_ADDRESS"`
 	TokkenStructureKey  string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	GINSERVERADDRESS    string        `mapstructure:"GIN_SERVER_ADDRESS"`
 	GINMODE             string        `mapstructure:"GIN_MODE"`
 }
 

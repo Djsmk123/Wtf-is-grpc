@@ -5,6 +5,5 @@ import (
 )
 
 type MongoCollections struct {
-	Database *mongo.Database
-	Users    *mongo.Collection
+	Users *mongo.Collection
 }

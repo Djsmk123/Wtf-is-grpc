@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package pb;
+option go_package="github.com/djsmk123/server/pb";
+
+message EmptyRequest{
+    
+}

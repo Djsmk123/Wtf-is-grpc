@@ -1,7 +1,7 @@
 syntax="proto3";
 package pb;
 option go_package="github.com/djsmk123/server/pb";
-import "google/protobuf/empty.proto";
+import "empty_request.proto";
 import "rpc_get_user.proto";
 import "rpc_login.proto";
 import "rpc_signup.proto";
@@ -10,7 +10,7 @@ service GrpcServerService {
     rpc SignUp(SignupRequestMessage) returns (SignupResponseMessage){};
 
     rpc login(LoginRequestMessage) returns (LoginResponseMessage){};
-    rpc GetUser(google.protobuf.Empty) returns (GetUserResponse) {};
+    rpc GetUser(EmptyRequest) returns (GetUserResponse) {};
 }
 
 

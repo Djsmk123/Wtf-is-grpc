@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 
-	"github.com/djsmk123/server/api"
 	"github.com/djsmk123/server/db"
 	"github.com/djsmk123/server/gapi"
 
@@ -23,25 +22,31 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load configuration", err)
 	}
-	clientOptions := options.Client().ApplyURI(config.DBSource)
-	ctx := context.TODO()
-	client, err := mongo.Connect(ctx, clientOptions)
+	database, err := ConnectDatabase(config)
 	if err != nil {
-		log.Fatal("Failed to connect to MongoDB", err)
+		log.Fatal(err)
 	}
-	database := client.Database(config.DBNAME)
-
 	conn := db.MongoCollections{
 		Users: database.Collection("users"),
 	}
-
-	// Start the Gin server in a goroutine
-	go runGinServer(config)
-
 	// Start the gRPC server
 	runGrpcServer(config, conn)
 }
 
+// Connect to database
+
+func ConnectDatabase(config utils.ViperConfig) (*mongo.Database, error) {
+	clientOptions := options.Client().ApplyURI(config.DBSource)
+	ctx := context.TODO()
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to MongoDB: %v", err)
+	}
+	database := client.Database(config.DBNAME)
+	return database, nil
+}
+
+// start runGrpcService
 func runGrpcServer(config utils.ViperConfig, collection db.MongoCollections) {
 	server, err := gapi.NewServer(config, collection)
 
@@ -66,16 +71,4 @@ func runGrpcServer(config utils.ViperConfig, collection db.MongoCollections) {
 	if err != nil {
 		log.Fatal("Error serving gRPC server", err)
 	}
-}
-
-func runGinServer(config utils.ViperConfig) {
-	server, err := api.NewServer(config)
-	if err != nil {
-		log.Fatal("Cannot start Gin server", err)
-	}
-	err = server.Start(config.GINSERVERADDRESS)
-	if err != nil {
-		log.Fatal("Cannot start Gin server", err)
-	}
-	fmt.Printf("Gin server started on %s\n", config.GINSERVERADDRESS)
 }

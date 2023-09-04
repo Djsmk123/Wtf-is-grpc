@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type GrpcServerServiceClient interface {
 	SignUp(ctx context.Context, in *SignupRequestMessage, opts ...grpc.CallOption) (*SignupResponseMessage, error)
 	Login(ctx context.Context, in *LoginRequestMessage, opts ...grpc.CallOption) (*LoginResponseMessage, error)
-	GetUser(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetUserResponse, error)
+	GetUser(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 }
 
 type grpcServerServiceClient struct {
@@ -54,7 +53,7 @@ func (c *grpcServerServiceClient) Login(ctx context.Context, in *LoginRequestMes
 	return out, nil
 }
 
-func (c *grpcServerServiceClient) GetUser(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetUserResponse, error) {
+func (c *grpcServerServiceClient) GetUser(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, "/pb.GrpcServerService/GetUser", in, out, opts...)
 	if err != nil {
@@ -69,7 +68,7 @@ func (c *grpcServerServiceClient) GetUser(ctx context.Context, in *emptypb.Empty
 type GrpcServerServiceServer interface {
 	SignUp(context.Context, *SignupRequestMessage) (*SignupResponseMessage, error)
 	Login(context.Context, *LoginRequestMessage) (*LoginResponseMessage, error)
-	GetUser(context.Context, *emptypb.Empty) (*GetUserResponse, error)
+	GetUser(context.Context, *EmptyRequest) (*GetUserResponse, error)
 	mustEmbedUnimplementedGrpcServerServiceServer()
 }
 
@@ -83,7 +82,7 @@ func (UnimplementedGrpcServerServiceServer) SignUp(context.Context, *SignupReque
 func (UnimplementedGrpcServerServiceServer) Login(context.Context, *LoginRequestMessage) (*LoginResponseMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedGrpcServerServiceServer) GetUser(context.Context, *emptypb.Empty) (*GetUserResponse, error) {
+func (UnimplementedGrpcServerServiceServer) GetUser(context.Context, *EmptyRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedGrpcServerServiceServer) mustEmbedUnimplementedGrpcServerServiceServer() {}
@@ -136,7 +135,7 @@ func _GrpcServerService_Login_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _GrpcServerService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -148,7 +147,7 @@ func _GrpcServerService_GetUser_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/pb.GrpcServerService/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GrpcServerServiceServer).GetUser(ctx, req.(*emptypb.Empty))
+		return srv.(GrpcServerServiceServer).GetUser(ctx, req.(*EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

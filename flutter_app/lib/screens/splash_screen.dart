@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_app/screens/home_screen.dart';
 import 'package:flutter_app/screens/login.dart';
 import 'package:flutter_app/services/auth.dart';
+import 'package:flutter_app/services/grpc_services.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,7 +18,51 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    initAsync();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      updateAddress();
+    });
+    //initAsync();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  void updateAddress() {
+    showDialog(
+        context: context,
+        builder: (builder) {
+          return AlertDialog(
+            title: const Text("Add server address"),
+            content: TextFormField(
+              initialValue: GrpcService.host,
+              decoration: const InputDecoration(
+                labelText: "Enter Server Address",
+              ),
+              onChanged: (value) {
+                GrpcService.host = value;
+              },
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Next"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  GrpcService.updateChannel();
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Update"),
+              ),
+            ],
+          );
+        }).then((value) {
+      initAsync();
+    });
   }
 
   Future<void> initAsync() async {
@@ -31,6 +79,7 @@ class _SplashScreenState extends State<SplashScreen> {
         navigateToLogin();
       }
     } catch (e) {
+      log(e.toString());
       navigateToLogin();
     }
   }

@@ -2,11 +2,19 @@ import 'package:flutter_app/pb/rpc_services.pbgrpc.dart';
 import 'package:grpc/grpc.dart';
 
 class GrpcService {
-  static final channel = ClientChannel("10.0.2.2",
+  static String host = "10.0.2.2"; //default for android emulator
+  static updateChannel() {
+    channel = ClientChannel(host,
+        port: 9090,
+        options:
+            const ChannelOptions(credentials: ChannelCredentials.insecure()));
+  }
+
+  static var channel = ClientChannel(host,
       port: 9090,
       options: const ChannelOptions(
-          credentials: ChannelCredentials.insecure(),
-          connectionTimeout: Duration(seconds: 10)));
+        credentials: ChannelCredentials.insecure(),
+      ));
 
   static var client = GrpcServerServiceClient(channel);
 }

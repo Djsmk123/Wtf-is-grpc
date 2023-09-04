@@ -6,7 +6,7 @@ proto:
     proto/*.proto
 
 evans:
-	0evans --host localhost --port 9090 -r repl
+	evans --host localhost --port 9090 -r repl
 
 
 .PHONY: run proto

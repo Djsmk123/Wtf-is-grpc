@@ -1,0 +1,14 @@
+syntax="proto3";
+package pb;
+import "user.proto";
+option go_package="github.com/djsmk123/server/pb";
+message UsersListRequest{
+     int32 page_number = 1;
+     int32 page_size = 2;
+     optional string name =3;
+
+}
+message ListUserMessage{
+    int32 total_count =1; 
+    repeated User users=2;     
+}

@@ -15,11 +15,12 @@ func methodRequiresAuthentication(fullMethod string) bool {
 	NonAuthRequiredMethods := []string{
 		"login",
 		"signup",
+		"getnotifications",
 	}
 
 	// Check if the requested method is in the list.
 	for _, method := range NonAuthRequiredMethods {
-		if m == method {
+		if m == strings.ToLower(method) {
 			return false
 		}
 	}

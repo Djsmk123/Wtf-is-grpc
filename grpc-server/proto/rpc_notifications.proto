@@ -1,0 +1,11 @@
+syntax="proto3";
+package pb;
+
+option go_package="github.com/djsmk123/server/pb";
+
+
+message NotificationMessage{
+    int32 id=1;
+    string title=2;
+    string description=3;
+}

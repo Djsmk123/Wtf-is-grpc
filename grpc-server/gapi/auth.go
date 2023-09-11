@@ -5,6 +5,7 @@ import (
 
 	"github.com/djsmk123/server/auth"
 	pb "github.com/djsmk123/server/pb"
+
 	"github.com/djsmk123/server/token"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -70,4 +71,27 @@ func (server *Server) GetUser(ctx context.Context, req *pb.EmptyRequest) (*pb.Ge
 		User: auth.ConvertUserObjectToUser(user),
 	}, nil
 
+}
+
+func (server *Server) GetUsers(ctx context.Context, req *pb.UsersListRequest) (*pb.ListUserMessage, error) {
+	payload, ok := ctx.Value(payloadHeader).(*token.Payload)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "missing required token")
+	}
+	users, err := auth.GetUsers(server.dbCollection.Users, context.TODO(), int(req.GetPageNumber()), int(req.GetPageSize()), req.Name, payload.Username)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+	pbUsers := []*pb.User{}
+
+	for _, user := range users {
+		pbUser := auth.ConvertUserObjectToUser(user)
+		pbUsers = append(pbUsers, pbUser)
+	}
+
+	return &pb.ListUserMessage{
+		TotalCount: int32(len(pbUsers)),
+		Users:      pbUsers,
+	}, nil
 }

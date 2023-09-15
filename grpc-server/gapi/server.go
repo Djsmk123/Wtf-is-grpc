@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/djsmk123/server/db"
 	"github.com/djsmk123/server/pb"
@@ -11,6 +12,8 @@ import (
 
 type Server struct {
 	pb.GrpcServerServiceServer
+	clients      map[string]pb.GrpcServerService_SendMessageServer
+	mu           sync.Mutex
 	config       utils.ViperConfig
 	dbCollection db.MongoCollections
 

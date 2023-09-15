@@ -17,14 +17,15 @@ const (
 	payloadHeader       = "payload"
 )
 
-func (server *Server) AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	// Check if the service name is in a list of services that require authentication.
-	// Replace "Service1" and "Service2" with the actual service names you want to authenticate.
-	//requiredServices := []string{"pb.GrpcServerService"}
-
-	//serviceName := info.FullMethod
-
-	if methodRequiresAuthentication(info.FullMethod) {
+func (server *Server) UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	ctx, err := server.AuthInterceptor(info.FullMethod, ctx)
+	if err != nil {
+		return nil, err
+	}
+	return handler(ctx, req)
+}
+func (server *Server) AuthInterceptor(method string, ctx context.Context) (context.Context, error) {
+	if methodRequiresAuthentication(method) {
 		// Extract the metadata from the context.
 		md, ok := metadata.FromIncomingContext(ctx)
 
@@ -32,10 +33,11 @@ func (server *Server) AuthInterceptor(ctx context.Context, req interface{}, info
 			return nil, status.Errorf(codes.InvalidArgument, "metadata not found")
 		}
 
-		// Get the authorization token from metadata.
+		// Get the authorization token from metadata if present.
 		authTokens := md[authorizationHeader]
 		if len(authTokens) == 0 {
-			return nil, status.Errorf(codes.Unauthenticated, "authorization token is missing")
+			// No token found, but it's optional, so return the unmodified context.
+			return ctx, nil
 		}
 
 		authHeader := authTokens[0] // Assuming a single token is sent in the header.
@@ -63,8 +65,27 @@ func (server *Server) AuthInterceptor(ctx context.Context, req interface{}, info
 			}
 		}
 		ctx = context.WithValue(ctx, payloadHeader, payload)
-		return handler(ctx, req)
 	}
+	return ctx, nil
+}
 
-	return handler(ctx, req)
+type customServerStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (css *customServerStream) Context() context.Context {
+	return css.ctx
+}
+func (server *Server) StreamAuthInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	ctx := stream.Context()
+	ctx, err := server.AuthInterceptor(info.FullMethod, ctx)
+	if err != nil {
+		return err
+	}
+	newStream := &customServerStream{
+		ServerStream: stream,
+		ctx:          ctx,
+	}
+	return handler(srv, newStream)
 }

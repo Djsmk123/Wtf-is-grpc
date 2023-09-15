@@ -10,7 +10,7 @@ func methodRequiresAuthentication(fullMethod string) bool {
 	m = strings.ToLower(m)
 	fmt.Println(m)
 
-	// Define a list of methods that require authentication.
+	// Define a list of methods that not  require authentication.
 
 	NonAuthRequiredMethods := []string{
 		"login",

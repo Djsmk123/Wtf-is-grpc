@@ -6,4 +6,5 @@ import (
 
 type MongoCollections struct {
 	Users *mongo.Collection
+	Chats *mongo.Collection
 }

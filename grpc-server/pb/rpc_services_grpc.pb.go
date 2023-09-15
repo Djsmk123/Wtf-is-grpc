@@ -27,6 +27,8 @@ type GrpcServerServiceClient interface {
 	GetUser(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	GetUsers(ctx context.Context, in *UsersListRequest, opts ...grpc.CallOption) (*ListUserMessage, error)
 	GetNotifications(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (GrpcServerService_GetNotificationsClient, error)
+	SendMessage(ctx context.Context, opts ...grpc.CallOption) (GrpcServerService_SendMessageClient, error)
+	GetAllMessage(ctx context.Context, in *GetAllMessagesRequest, opts ...grpc.CallOption) (*GetAllMessagesResponse, error)
 }
 
 type grpcServerServiceClient struct {
@@ -105,6 +107,46 @@ func (x *grpcServerServiceGetNotificationsClient) Recv() (*NotificationMessage, 
 	return m, nil
 }
 
+func (c *grpcServerServiceClient) SendMessage(ctx context.Context, opts ...grpc.CallOption) (GrpcServerService_SendMessageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GrpcServerService_ServiceDesc.Streams[1], "/pb.GrpcServerService/SendMessage", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpcServerServiceSendMessageClient{stream}
+	return x, nil
+}
+
+type GrpcServerService_SendMessageClient interface {
+	Send(*SendMessageRequest) error
+	Recv() (*Message, error)
+	grpc.ClientStream
+}
+
+type grpcServerServiceSendMessageClient struct {
+	grpc.ClientStream
+}
+
+func (x *grpcServerServiceSendMessageClient) Send(m *SendMessageRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *grpcServerServiceSendMessageClient) Recv() (*Message, error) {
+	m := new(Message)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *grpcServerServiceClient) GetAllMessage(ctx context.Context, in *GetAllMessagesRequest, opts ...grpc.CallOption) (*GetAllMessagesResponse, error) {
+	out := new(GetAllMessagesResponse)
+	err := c.cc.Invoke(ctx, "/pb.GrpcServerService/GetAllMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GrpcServerServiceServer is the server API for GrpcServerService service.
 // All implementations must embed UnimplementedGrpcServerServiceServer
 // for forward compatibility
@@ -114,6 +156,8 @@ type GrpcServerServiceServer interface {
 	GetUser(context.Context, *EmptyRequest) (*GetUserResponse, error)
 	GetUsers(context.Context, *UsersListRequest) (*ListUserMessage, error)
 	GetNotifications(*EmptyRequest, GrpcServerService_GetNotificationsServer) error
+	SendMessage(GrpcServerService_SendMessageServer) error
+	GetAllMessage(context.Context, *GetAllMessagesRequest) (*GetAllMessagesResponse, error)
 	mustEmbedUnimplementedGrpcServerServiceServer()
 }
 
@@ -135,6 +179,12 @@ func (UnimplementedGrpcServerServiceServer) GetUsers(context.Context, *UsersList
 }
 func (UnimplementedGrpcServerServiceServer) GetNotifications(*EmptyRequest, GrpcServerService_GetNotificationsServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetNotifications not implemented")
+}
+func (UnimplementedGrpcServerServiceServer) SendMessage(GrpcServerService_SendMessageServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+}
+func (UnimplementedGrpcServerServiceServer) GetAllMessage(context.Context, *GetAllMessagesRequest) (*GetAllMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllMessage not implemented")
 }
 func (UnimplementedGrpcServerServiceServer) mustEmbedUnimplementedGrpcServerServiceServer() {}
 
@@ -242,6 +292,50 @@ func (x *grpcServerServiceGetNotificationsServer) Send(m *NotificationMessage) e
 	return x.ServerStream.SendMsg(m)
 }
 
+func _GrpcServerService_SendMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GrpcServerServiceServer).SendMessage(&grpcServerServiceSendMessageServer{stream})
+}
+
+type GrpcServerService_SendMessageServer interface {
+	Send(*Message) error
+	Recv() (*SendMessageRequest, error)
+	grpc.ServerStream
+}
+
+type grpcServerServiceSendMessageServer struct {
+	grpc.ServerStream
+}
+
+func (x *grpcServerServiceSendMessageServer) Send(m *Message) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *grpcServerServiceSendMessageServer) Recv() (*SendMessageRequest, error) {
+	m := new(SendMessageRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _GrpcServerService_GetAllMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GrpcServerServiceServer).GetAllMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.GrpcServerService/GetAllMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GrpcServerServiceServer).GetAllMessage(ctx, req.(*GetAllMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GrpcServerService_ServiceDesc is the grpc.ServiceDesc for GrpcServerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -265,12 +359,22 @@ var GrpcServerService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetUsers",
 			Handler:    _GrpcServerService_GetUsers_Handler,
 		},
+		{
+			MethodName: "GetAllMessage",
+			Handler:    _GrpcServerService_GetAllMessage_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GetNotifications",
 			Handler:       _GrpcServerService_GetNotifications_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "SendMessage",
+			Handler:       _GrpcServerService_SendMessage_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "rpc_services.proto",

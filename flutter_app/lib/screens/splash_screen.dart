@@ -6,6 +6,7 @@ import 'package:flutter_app/screens/home_screen.dart';
 import 'package:flutter_app/screens/login.dart';
 import 'package:flutter_app/services/auth.dart';
 import 'package:flutter_app/services/grpc_services.dart';
+import 'package:flutter_app/services/notification.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,14 +36,33 @@ class _SplashScreenState extends State<SplashScreen> {
         builder: (builder) {
           return AlertDialog(
             title: const Text("Add server address"),
-            content: TextFormField(
-              initialValue: GrpcService.host,
-              decoration: const InputDecoration(
-                labelText: "Enter Server Address",
-              ),
-              onChanged: (value) {
-                GrpcService.host = value;
-              },
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  initialValue: GrpcService.host,
+                  decoration: const InputDecoration(
+                    labelText: "Enter Server Address",
+                  ),
+                  onChanged: (value) {
+                    GrpcService.host = value;
+                  },
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  initialValue: GrpcService.port.toString(),
+                  decoration: const InputDecoration(
+                    labelText: "Enter port",
+                  ),
+                  onChanged: (value) {
+                    if (value.isNotEmpty && int.tryParse(value) != null) {
+                      GrpcService.port = int.parse(value);
+                    }
+                  },
+                ),
+              ],
             ),
             actions: [
               ElevatedButton(
@@ -67,6 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> initAsync() async {
     try {
+      await NotificationServices.initializeService();
       final isAuth = await AuthService.isAuthAvailable();
       if (isAuth) {
         final user = await AuthService.getUser();

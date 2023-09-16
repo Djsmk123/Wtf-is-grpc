@@ -1,17 +1,21 @@
 syntax="proto3";
 package pb;
 option go_package="github.com/djsmk123/server/pb";
-
-import "rpc_get_user.proto";
 import "empty_request.proto";
+import "rpc_get_user.proto";
 import "rpc_login.proto";
 import "rpc_signup.proto";
-
+import "rpc_users.proto";
+import "rpc_notifications.proto";
 service GrpcServerService {
     rpc SignUp(SignupRequestMessage) returns (SignupResponseMessage){};
 
     rpc login(LoginRequestMessage) returns (LoginResponseMessage){};
     rpc GetUser(EmptyRequest) returns (GetUserResponse) {};
+
+    rpc GetUsers(UsersListRequest) returns (ListUserMessage) {};
+
+    rpc GetNotifications(EmptyRequest) returns (stream NotificationMessage){}
 }
 
 

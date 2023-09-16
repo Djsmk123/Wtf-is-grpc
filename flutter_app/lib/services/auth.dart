@@ -4,6 +4,7 @@ import 'package:flutter_app/models/user.dart';
 import 'package:flutter_app/pb/empty_request.pb.dart';
 import 'package:flutter_app/pb/rpc_login.pb.dart';
 import 'package:flutter_app/pb/rpc_signup.pb.dart';
+import 'package:flutter_app/pb/rpc_users.pb.dart';
 import 'package:flutter_app/services/grpc_services.dart';
 import 'package:grpc/service_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -77,5 +78,13 @@ class AuthService {
       log(e.toString());
       rethrow;
     }
+  }
+
+  static Future<List<UserModel>> getUsers(
+      {int pageNumber = 1, String? search}) async {
+    final res = await GrpcService.client.getUsers(
+        UsersListRequest(pageSize: 10, pageNumber: pageNumber, name: search),
+        options: CallOptions(metadata: {'authorization': 'bearer $authToken'}));
+    return res.users.map((e) => UserModel(e.id, e.username, e.name)).toList();
   }
 }

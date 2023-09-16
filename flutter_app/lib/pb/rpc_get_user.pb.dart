@@ -13,11 +13,11 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'user.pb.dart' as $6;
+import 'user.pb.dart' as $8;
 
 class GetUserResponse extends $pb.GeneratedMessage {
   factory GetUserResponse({
-    $6.User? user,
+    $8.User? user,
   }) {
     final $result = create();
     if (user != null) {
@@ -30,7 +30,7 @@ class GetUserResponse extends $pb.GeneratedMessage {
   factory GetUserResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GetUserResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'pb'), createEmptyInstance: create)
-    ..aOM<$6.User>(1, _omitFieldNames ? '' : 'user', subBuilder: $6.User.create)
+    ..aOM<$8.User>(1, _omitFieldNames ? '' : 'user', subBuilder: $8.User.create)
     ..hasRequiredFields = false
   ;
 
@@ -56,15 +56,15 @@ class GetUserResponse extends $pb.GeneratedMessage {
   static GetUserResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $6.User get user => $_getN(0);
+  $8.User get user => $_getN(0);
   @$pb.TagNumber(1)
-  set user($6.User v) { setField(1, v); }
+  set user($8.User v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasUser() => $_has(0);
   @$pb.TagNumber(1)
   void clearUser() => clearField(1);
   @$pb.TagNumber(1)
-  $6.User ensureUser() => $_ensure(0);
+  $8.User ensureUser() => $_ensure(0);
 }
 
 

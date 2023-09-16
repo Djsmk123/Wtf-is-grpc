@@ -39,7 +39,7 @@ func SendMessage(ctx context.Context, messsage string, sender string, reciever s
 	result, err := database.Chats.InsertOne(ctx, newMessage)
 	insertedID, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return nil, status.Errorf(codes.Internal,"failed to get inserted ID")
+		return nil, status.Errorf(codes.Internal, "failed to get inserted ID")
 	}
 	newMessage.ID = insertedID
 
@@ -63,8 +63,10 @@ func GetAllMessage(ctx context.Context, db *db.MongoCollections, sender string, 
 		return nil, status.Errorf(codes.Internal, "something went wrong")
 	}
 	filter := bson.M{
-		"sender":   sender,
-		"receiver": receiver,
+		"$or": []bson.M{
+			{"sender": sender, "receiver": receiver},
+			{"sender": receiver, "receiver": sender},
+		},
 	}
 
 	cursor, err := db.Chats.Find(ctx, filter)

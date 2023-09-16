@@ -13,7 +13,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'user.pb.dart' as $6;
+import 'user.pb.dart' as $8;
 
 class UsersListRequest extends $pb.GeneratedMessage {
   factory UsersListRequest({
@@ -96,7 +96,7 @@ class UsersListRequest extends $pb.GeneratedMessage {
 class ListUserMessage extends $pb.GeneratedMessage {
   factory ListUserMessage({
     $core.int? totalCount,
-    $core.Iterable<$6.User>? users,
+    $core.Iterable<$8.User>? users,
   }) {
     final $result = create();
     if (totalCount != null) {
@@ -113,7 +113,7 @@ class ListUserMessage extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListUserMessage', package: const $pb.PackageName(_omitMessageNames ? '' : 'pb'), createEmptyInstance: create)
     ..a<$core.int>(1, _omitFieldNames ? '' : 'totalCount', $pb.PbFieldType.O3)
-    ..pc<$6.User>(2, _omitFieldNames ? '' : 'users', $pb.PbFieldType.PM, subBuilder: $6.User.create)
+    ..pc<$8.User>(2, _omitFieldNames ? '' : 'users', $pb.PbFieldType.PM, subBuilder: $8.User.create)
     ..hasRequiredFields = false
   ;
 
@@ -148,7 +148,7 @@ class ListUserMessage extends $pb.GeneratedMessage {
   void clearTotalCount() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$6.User> get users => $_getList(1);
+  $core.List<$8.User> get users => $_getList(1);
 }
 
 

@@ -7,6 +7,7 @@ import "rpc_login.proto";
 import "rpc_signup.proto";
 import "rpc_users.proto";
 import "rpc_notifications.proto";
+import "rpc_chat.proto";
 service GrpcServerService {
     rpc SignUp(SignupRequestMessage) returns (SignupResponseMessage){};
 
@@ -16,6 +17,8 @@ service GrpcServerService {
     rpc GetUsers(UsersListRequest) returns (ListUserMessage) {};
 
     rpc GetNotifications(EmptyRequest) returns (stream NotificationMessage){}
+    rpc SendMessage(stream SendMessageRequest) returns (stream Message){};
+    rpc GetAllMessage(GetAllMessagesRequest) returns (GetAllMessagesResponse){};
 }
 
 

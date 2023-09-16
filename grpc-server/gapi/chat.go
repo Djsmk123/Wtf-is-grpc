@@ -27,6 +27,7 @@ func (server *Server) SendMessage(stream pb.GrpcServerService_SendMessageServer)
 	}
 	server.clients[payload.Username] = stream
 	server.mu.Unlock()
+
 	// Continuously receive and forward messages.
 	for {
 		message, err := stream.Recv()
@@ -38,30 +39,58 @@ func (server *Server) SendMessage(stream pb.GrpcServerService_SendMessageServer)
 			return status.Errorf(codes.Internal, "Error receiving message: %v", err)
 		}
 
-		res, err := services.SendMessage(stream.Context(), message.Message, payload.Username, message.Reciever, &server.dbCollection)
-		if err != nil {
-			return status.Errorf(codes.Internal, "Error saving message: %v", err)
-		}
-		// Find the receiver by username.
-		server.mu.Lock()
-		receiver, ok := server.clients[message.Reciever]
-		server.mu.Unlock()
+		if message.Message == "Join_room" {
+			// Special handling for "Join_room" message.
+			// Send a confirmation message back to the sender.
+			response := &pb.Message{
+				Sender:   "Server", // You can set the sender to "Server" or any other identifier.
+				Receiver: payload.Username,
+				Message:  "You have joined the room.",
+			}
+			if err := stream.Send(response); err != nil {
+				log.Printf("Error sending confirmation message: %v", err)
+			}
+		} else {
+			// Normal message handling.
+			res, err := services.SendMessage(stream.Context(), message.Message, payload.Username, message.Reciever, &server.dbCollection)
+			if err != nil {
+				return status.Errorf(codes.Internal, "Error saving message: %v", err)
+			}
 
-		if !ok {
-			// If the receiver is not found, send an error message back to the sender.
-			continue
-		}
+			// Find the receiver by username.
+			server.mu.Lock()
+			receiver, ok := server.clients[message.Reciever]
+			sender, ok := server.clients[payload.Username]
+			server.mu.Unlock()
 
-		// Forward the message to the receiver.
-		err = receiver.Send(&pb.Message{
-			Sender:   payload.Username,
-			Receiver: message.Reciever,
-			Message:  message.Message,
-			Id:       res.ID.Hex(),
-		})
-		if err != nil {
-			log.Printf("Error sending message to %s: %v", message.Reciever, err)
-			continue
+			if !ok {
+				// If the receiver or sender is not found, send an error message back to the sender.
+				continue
+			}
+
+			// Forward the message to the receiver.
+			err = receiver.Send(&pb.Message{
+				Sender:   payload.Username,
+				Receiver: message.Reciever,
+				Message:  message.Message,
+				Id:       res.ID.Hex(),
+			})
+			if err != nil {
+				log.Printf("Error sending message to %s: %v", message.Reciever, err)
+				continue
+			}
+
+			// Send the same message back to the sender as a confirmation.
+			err = sender.Send(&pb.Message{
+				Sender:   payload.Username,
+				Receiver: message.Reciever,
+				Message:  message.Message,
+				Id:       res.ID.Hex(),
+			})
+			if err != nil {
+				log.Printf("Error sending confirmation message to %s: %v", payload.Username, err)
+				continue
+			}
 		}
 	}
 

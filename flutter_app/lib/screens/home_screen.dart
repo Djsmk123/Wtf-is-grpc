@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/user.dart';
 import 'package:flutter_app/screens/login.dart';
+import 'package:flutter_app/screens/message_screen.dart';
 import 'package:flutter_app/services/auth.dart';
 import 'package:grpc/grpc.dart';
 
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       isLoading = false;
       setState(() {});
     }
-  }
+  } /*eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsInVzZXJuYW1lIjoiaXJvbm1hbiIsImlzc3VlZF9hdCI6IjIwMjMtMDktMTZUMTY6MDA6MjQuMzY1NzgzKzA1OjMwIiwiZXhwaXJlZF9hdCI6IjIwMjMtMDktMTdUMDI6MDA6MjQuMzY1NzgzKzA1OjMwIn0.kjeeca9fMBMjNmBSpdxMrfz6Ny67Fbn_oWOJ85hT7Pc*/
 
   @override
   Widget build(BuildContext context) {
@@ -140,36 +141,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (context, index) {
                   UserModel user = users[index];
                   int random = Random().nextInt(49);
-                  return Card(
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 10),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: Container(
-                                height: 80,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                    color: Colors.grey,
-                                    border: Border.all(color: Colors.black),
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: NetworkImage(
-                                            "https://xsgames.co/randomusers/assets/avatars/pixel/$random.jpg"))),
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) =>
+                                  MessageScreen(reciever: user)));
+                    },
+                    child: Card(
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 10),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Container(
+                                  height: 80,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey,
+                                      border: Border.all(color: Colors.black),
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: NetworkImage(
+                                              "https://xsgames.co/randomusers/assets/avatars/pixel/$random.jpg"))),
+                                ),
+                                title: Text(user.fullname),
+                                subtitle: Text(user.username),
+                                trailing: const Icon(Icons.navigate_next),
                               ),
-                              title: Text(user.fullname),
-                              subtitle: Text(user.username),
-                              trailing: const Icon(Icons.navigate_next),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );

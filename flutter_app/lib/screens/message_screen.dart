@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/user.dart';
 import 'package:flutter_app/pb/rpc_chat.pb.dart';
-import 'package:flutter_app/pb/timestamp.pb.dart';
 import 'package:flutter_app/screens/widgets/reciver_message_widget.dart';
 import 'package:flutter_app/screens/widgets/sender_message_widget.dart';
 import 'package:flutter_app/services/auth.dart';
@@ -23,61 +22,61 @@ class _MessageScreenState extends State<MessageScreen> {
   final TextEditingController controller = TextEditingController();
   List<Message> messages = [];
   bool isLoading = false;
+  final StreamController<SendMessageRequest> streamController =
+      StreamController<SendMessageRequest>();
+  final ScrollController scrollController = ScrollController();
 
   String? error;
 
   @override
   void initState() {
     super.initState();
-    fetchChatsHistory();
-    _startListeningToMessages().listen((event) {
-      print('received message: ');
-      if (event.message != "You have joined the room.") {
-        messages.add(event);
-        setState(() {});
+    initAsync();
+  }
+
+  initAsync() async {
+    await fetchChatsHistory();
+    startListeningMessageRequest();
+    addMessage("Join_room");
+  }
+
+  void startListeningMessageRequest() {
+    final stream = GrpcService.client.sendMessage(streamController.stream,
+        options: CallOptions(
+            metadata: {'authorization': 'bearer ${AuthService.authToken}'}));
+    stream.listen((value) {
+      if (value.sender != "Server") {
+        messages.add(value);
+      } else {
+        if (value.message.contains("has joined the room.")) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${widget.reciever.fullname} has joined now.'),
+            ),
+          );
+        }
       }
+      setState(() {});
     });
   }
 
-  Stream<Message> _startListeningToMessages() async* {
-    SendMessageRequest request = SendMessageRequest(
-      message: "Join_room",
+  void addMessage(String message) {
+    // Simulate adding a message to the stream when a button is clicked
+    final req = SendMessageRequest(
+      message: message,
       reciever: widget.reciever.username,
     );
-
-    // Start listening to the gRPC server's response stream
-    final stream = GrpcService.client.sendMessage(const Stream.empty(),
-        options: CallOptions(
-            metadata: {'authorization': 'bearer ${AuthService.authToken}'}));
-
-    // Create a subscription to listen for updates
-    await for (var response in stream) {
-      yield response;
-    }
+    streamController.sink.add(req);
   }
 
   void _sendMessage() {
     final messageText = controller.text;
 
     if (messageText.isNotEmpty) {
-      final request = SendMessageRequest(
-        message: messageText,
-        reciever: widget.reciever.username,
-      );
+      addMessage(messageText);
 
-      // Send the message using gRPC.
-      GrpcService.client.sendMessage(Stream.fromIterable([request]),
-          options: CallOptions(
-              metadata: {'authorization': 'bearer ${AuthService.authToken}'}));
-      // Clear the input field.
-
-      messages.add(Message(
-          id: "12321",
-          createdAt: Timestamp.fromDateTime(DateTime.now()),
-          sender: AuthService.user?.username,
-          receiver: widget.reciever.username,
-          message: controller.text));
       controller.clear();
+      scrollDown();
       setState(() {});
     }
   }
@@ -91,7 +90,7 @@ class _MessageScreenState extends State<MessageScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to send message: $error'),
+          content: Text('Failed to get messages: $error'),
         ),
       );
     } finally {
@@ -103,16 +102,27 @@ class _MessageScreenState extends State<MessageScreen> {
 
   @override
   void dispose() {
+    streamController.close();
+    controller.dispose();
+    scrollController.dispose();
     super.dispose();
+  }
+
+  void scrollDown() {
+    scrollController.animateTo(
+      scrollController.position.maxScrollExtent,
+      duration: const Duration(seconds: 2),
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    //_startListeningToMessages();
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text("Chat History"),
+        title: Text(
+            "${widget.reciever.fullname.replaceRange(0, 1, widget.reciever.fullname[0].toUpperCase())}'s"),
       ),
       body: Center(
         child: Column(
@@ -126,6 +136,7 @@ class _MessageScreenState extends State<MessageScreen> {
                         ? Expanded(
                             child: ListView.builder(
                                 shrinkWrap: true,
+                                controller: scrollController,
                                 itemCount: messages.length,
                                 itemBuilder: ((context, index) {
                                   Message message = messages[index];

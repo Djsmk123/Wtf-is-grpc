@@ -2,7 +2,7 @@ import 'package:flutter_app/pb/rpc_services.pbgrpc.dart';
 import 'package:grpc/grpc.dart';
 
 class GrpcService {
-  static String host = "192.168.1.8"; //default for android emulator
+  static String host = "192.168.1.4"; //default for android emulator
   static int port = 9090;
   static updateChannel() {
     channel = ClientChannel(

@@ -17,7 +17,7 @@ In this part, we will dive into the fundamentals of gRPC authentication and midd
 - Practical examples in Go and Flutter for implementing authentication and middleware.
 - Tips for overcoming common challenges and best practices.
 
-[Read Part 1](./part-1-authentication-middleware.md)
+[Read Part 1](https://dev.to/djsmk123/)
 
 ## Part 2: Custom Notification (Server-Side) : coming Soon
 

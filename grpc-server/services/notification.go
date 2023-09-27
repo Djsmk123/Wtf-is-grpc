@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/djsmk123/server/db/model"
+	"github.com/djsmk123/server/pb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NotificationNewUser(collection *mongo.Collection, notificationCh chan *model.Notification) {
+func NotificationNewUser(collection *mongo.Collection, notificationCh chan *pb.NotificationMessage) {
 	// Create a context with a timeout
 	ctx := context.Background()
 	//defer cancel()
@@ -64,10 +65,10 @@ func NotificationNewUser(collection *mongo.Collection, notificationCh chan *mode
 		// Generate a random int32
 		randomInt := rand.Int31()
 		// Create a new user notification
-		newUserNotification := &model.Notification{
+		newUserNotification := &pb.NotificationMessage{
 			Title:       "A new family member",
 			Description: user.Name + " just arrived,send 'hi' message to connect.",
-			Id:          int64(randomInt),
+			Id:          int32(randomInt),
 		}
 
 		// Send the notification to the channel

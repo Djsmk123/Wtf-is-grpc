@@ -1,7 +1,5 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 
@@ -110,12 +108,9 @@ class NotificationServices {
       await service.stopSelf();
     });
 
-    // bring to foreground
-
     if (service is AndroidServiceInstance) {
       final res = getNotification();
       res.listen((event) {
-        log(event.title.toString(), name: 'notification-service');
         flutterLocalNotificationsPlugin.show(
           notificationId,
           event.title,

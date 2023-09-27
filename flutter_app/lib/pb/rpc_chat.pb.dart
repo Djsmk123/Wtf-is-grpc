@@ -13,7 +13,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'timestamp.pb.dart' as $7;
+import 'google_timestamp.pb.dart' as $7;
 
 class Message extends $pb.GeneratedMessage {
   factory Message({
